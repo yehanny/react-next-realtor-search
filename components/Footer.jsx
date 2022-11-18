@@ -18,19 +18,6 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          <div>
-            <ul className="space-y-2">
-              <li>
-                <a href="#">About Us</a>
-              </li>
-              <li>
-                <a href="#">Contact Us</a>
-              </li>
-              <li>
-                <a href="#">Property Guides</a>
-              </li>
-            </ul>
-          </div>
           <div className="flex flex-col space-y-2">
             <p>Subscribe to our newsletter</p>
             <div className="flex flex-row">

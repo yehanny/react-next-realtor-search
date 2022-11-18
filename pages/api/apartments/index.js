@@ -15,7 +15,6 @@ export const apiApartmentsSlice = createApi({
       keepUnusedDataFor: 60,
       query: (args) => {
         const { filters } = args;
-        console.info("args", args);
         let newFilter = Object.keys(filters).reduce((ACC, filter) => {
           if (Boolean(filters?.[filter])) {
             ACC[filter] = filters[filter];

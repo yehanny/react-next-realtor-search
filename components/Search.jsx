@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"
 
 const Search = ({ filteredData, handleChange }) => {
   return (
@@ -11,11 +11,11 @@ const Search = ({ filteredData, handleChange }) => {
             <a className="data" key={data.id} target="_blank" href={data.url}>
               <p>{data.name}</p>
             </a>
-          );
+          )
         })}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Search;
+export default Search
