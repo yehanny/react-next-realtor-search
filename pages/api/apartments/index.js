@@ -26,6 +26,10 @@ export const apiApartmentsSlice = createApi({
           params: newFilter,
         };
       },
+      transformResponse: (response, meta, args) => {
+        let newResponse = { response, total: meta.response.headers.get("x-total-count") };
+        return newResponse;
+      },
       providesTags: ["Apartment"],
     }),
     getApartmentById: builder.query({

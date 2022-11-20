@@ -5,16 +5,26 @@ import Footer from "../components/Footer";
 import Link from "next/link";
 import Select from "react-select";
 import Search from "../components/Search";
+import Pagination from "../components/pagination/Pagination";
+import SwaggerClient from "swagger-client";
 
 const App = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(null);
   const [totalItems, setTotalItems] = useState(0);
   const [filters, setFilters] = useState({
-    _limit: itemsPerPage,
+    _limit: 12,
     _page: currentPage,
     city: "Miami",
   });
+
+  // Import a JSON file with the API definition and create a client using the SwaggerClient constructor
+  const client = SwaggerClient("test.json", {
+    requestInterceptor: (req, res) => {
+      console.log("req", req, "res", res);
+      // req.headers["Authorization"] = `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`;
+    },
+  });
+
   const { data, isLoading: isApartmentsLoading, isSuccess: isApartmentsSuccess, isError: isApartmentsError, error: apartmentsError } = useGetApartmentsQuery({ filters: filters });
 
   const [propertyData, setPropertyData] = useState();
@@ -32,9 +42,8 @@ const App = (props) => {
   // Create a filter select by city for the apartments data
   let filterValues = {};
   const filterByCity = (e) => {
-    const city = e.value;
     filterValues = {
-      city,
+      city: e.value,
       name: null,
     };
     setFilters({ ...filters, ...filterValues });
@@ -61,7 +70,7 @@ const App = (props) => {
     setFilters({ ...filters, ...filterValues });
   };
 
-  // Create a funtion to handle the search input field and get the object keys and values
+  // Create a function to handle the search input field and get the object keys and values
   // and return the results with a given criteria of the search term
 
   useEffect(() => {
@@ -74,8 +83,13 @@ const App = (props) => {
         </div>
       );
     } else if (isApartmentsSuccess) {
-      data ? setTotalItems(data.length) : setTotalItems(0);
-      setPropertyData(<Apartments data={data} currentPage={currentPage} itemsPerPage={itemsPerPage} totalItems={totalItems} setCurrentPage={setCurrentPage} setItemsPerPage={setItemsPerPage} />);
+      console.log("data", data);
+      data.response ? setTotalItems(data.response.length) : setTotalItems(0);
+      setPropertyData(
+        <>
+          <Apartments data={data.response} filters={filters} setFilters={setFilters} onPageChange={(page) => setCurrentPage(page)} currentPage={currentPage} totalCount={data.total} pageSize={totalItems} />
+        </>
+      );
     } else if (isApartmentsError) {
       setPropertyData(
         <div className="alert alert-danger w-100 text-center" role="alert">
@@ -83,7 +97,7 @@ const App = (props) => {
         </div>
       );
     }
-  }, [data, filters, itemsPerPage, currentPage, totalItems]);
+  }, [data, filters, currentPage, totalItems]);
 
   // United States Florida Cities list for the filter select
   const cities = [
@@ -176,11 +190,16 @@ const App = (props) => {
   ];
 
   const handleFilteredProperties = (e) => {
-    // e.preventDefault();
     const city = e.value;
-    const filtered = data.filter((item) => item.city === city);
     filterValues = {
       city,
+    };
+    setFilters({ ...filters, ...filterValues });
+  };
+
+  const handleItemsPerPage = (e) => {
+    filterValues = {
+      _limit: e.value,
     };
     setFilters({ ...filters, ...filterValues });
   };
@@ -204,26 +223,12 @@ const App = (props) => {
               </li>
             </ul>
           </div>
-          <div>
-            <a>
-              {/* <Icon width={30} /> */}
-              <img src={"../images/icons/icon.svg"} />
-            </a>
-          </div>
         </div>
 
         {/* Hero  */}
         <div className="mx-auto max-w-3xl">
-          <p className="text-5xl font-bold text-white text-center py-20 leading-relaxed">Discover the Best Apartment Around the World</p>
+          <p className="text-5xl font-bold text-white text-center py-20 leading-relaxed">Discover your Apartment</p>
         </div>
-
-        {/* Search */}
-        {/* <Search
-          handleChange={debounce((v) => {
-            setSearch(v);
-          }, 2000)}
-          filteredData={filteredData}
-        /> */}
 
         <form className="mx-auto max-w-3xl flex items-center justify-center space-x-4" onSubmit={(e) => handleFilteredProperties(e)}>
           <div className="mx-auto max-w-3xl hidden sm:block">
@@ -261,11 +266,29 @@ const App = (props) => {
       </div>
 
       {/* Appartment list */}
+      <ItemsPerPage handleItemsPerPage={handleItemsPerPage} />
       <div id="properties">{propertyData}</div>
 
       {/* Footer */}
       <Footer />
     </>
+  );
+};
+
+// Create a component to filter the items per page based on the dropdown value selected
+const ItemsPerPage = ({ itemsPerPage, handleItemsPerPage }) => {
+  const itemsPerPageOptions = [
+    { label: "12", value: "12" },
+    { label: "24", value: "24" },
+    { label: "48", value: "48" },
+    { label: "96", value: "96" },
+  ];
+
+  return (
+    <div className="flex items-center justify-center space-x-4 space-y-4">
+      <label className="text-xs text-gray-700">Items per page</label>
+      <Select name="itemsPerPage" options={itemsPerPageOptions} placeholder="Select" defaultValue={12} onChange={handleItemsPerPage} />
+    </div>
   );
 };
 
@@ -313,6 +336,8 @@ const Apartments = (props) => {
             <p>No data found. Please try again</p>
           )}
         </div>
+        <div className="flex justify-center">{props.totalItems}</div>
+        <Pagination filters={props.filters} setFilters={props.setFilters} onPageChange={props.onPageChange} currentPage={props.currentPage} totalCount={props.totalCount} pageSize={props.pageSize} />
       </div>
     </div>
   );
