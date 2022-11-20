@@ -56,7 +56,7 @@ const App = (props) => {
     e.preventDefault();
     const search = e?.target.value;
     if (search?.length > 3) {
-      const filtered = data.filter((item) => item.name.toLowerCase().includes(search?.toLowerCase()));
+      const filtered = data.response.filter((item) => item.name.toLowerCase().includes(search?.toLowerCase()));
       let name = filtered[0]?.name ? filtered[0]?.name : null;
       filterValues = {
         name: name,
@@ -190,6 +190,11 @@ const App = (props) => {
   ];
 
   const handleFilteredProperties = (e) => {
+    e.preventDefault();
+    filterProperties(e);
+  };
+
+  const filterProperties = (e) => {
     const city = e.value;
     filterValues = {
       city,
@@ -230,7 +235,7 @@ const App = (props) => {
           <p className="text-5xl font-bold text-white text-center py-20 leading-relaxed">Discover your Apartment</p>
         </div>
 
-        <form className="mx-auto max-w-3xl flex items-center justify-center space-x-4" onSubmit={(e) => handleFilteredProperties(e)}>
+        <form className="mx-auto max-w-3xl flex items-center justify-center space-x-4" onSubmit={(e) => handleFilteredProperties(filterProperties(e))}>
           <div className="mx-auto max-w-3xl hidden sm:block">
             <div className="flex divide-x bg-white py-4 justify-center items-center flex-row ">
               <div className="sm:px-6 flex flex-col ">
